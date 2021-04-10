@@ -24,6 +24,12 @@ namespace obrazce
     public MainWindow()
     {
       InitializeComponent();
+
+      Trojuhelnik.VykresliIkonu(trojuhelnik_button_icon);
+      Ctverec.VykresliIkonu(ctverec_button_icon);
+      Obdelnik.VykresliIkonu(obdelnik_button_icon);
+      Kruh.VykresliIkonu(kruh_button_icon);
+      Nsten.VykresliIkonu(nsten_button_icon);
     }
 
     public void Clear()
@@ -63,6 +69,8 @@ namespace obrazce
           CreateNumberBox("strana a", "10");
           CreateNumberBox("strana b", "20");
           CreateNumberBox("strana c", "30");
+          //Trojuhelnik trojuhelnik = new Trojuhelnik(shape_canvas, 100, 100, 100, true);
+          //trojuhelnik.VykresliTvar();
           break;
         case "ctverec_button":
           System.Diagnostics.Trace.WriteLine("test");
@@ -99,10 +107,5 @@ namespace obrazce
       var dialog = new AboutWindow();
       dialog.ShowDialog();
     }
-  }
-
-  public class Shape
-  {
-    public string test;
   }
 }

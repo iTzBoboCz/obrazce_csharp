@@ -35,11 +35,36 @@
         </Grid.ColumnDefinitions>
         <StackPanel Grid.Column="1">
           <TextBlock Text="Tvary" FontSize="20" FontWeight="Bold" HorizontalAlignment="Center"/>
-          <Button x:Name="trojuhelnik_button" Content="trojúhelník" Click="shape_button_Click" HorizontalAlignment="Stretch" Margin="0,20,0,0"/>
-          <Button x:Name="ctverec_button" Content="čtverec" Click="shape_button_Click" HorizontalAlignment="Stretch" Margin="0,20,0,0"/>
-          <Button x:Name="obdelnik_button" Content="obdélník" Click="shape_button_Click" HorizontalAlignment="Stretch" Margin="0,20,0,0"/>
-          <Button x:Name="kruh_button" Content="kruh" Click="shape_button_Click" HorizontalAlignment="Stretch" Margin="0,20,0,0"/>
-          <Button x:Name="ngon_button" Content="n-stěn" Click="shape_button_Click" HorizontalAlignment="Stretch" Margin="0,20,0,0"/>
+          <Button x:Name="trojuhelnik_button" Click="shape_button_Click" HorizontalAlignment="Stretch" Margin="0,20,0,0">
+            <StackPanel>
+              <Canvas x:Name="trojuhelnik_button_icon" />
+              <TextBlock Text="trojúhelník" />
+            </StackPanel>
+          </Button>
+          <Button x:Name="ctverec_button" Click="shape_button_Click" HorizontalAlignment="Stretch" Margin="0,20,0,0">
+            <StackPanel>
+              <Canvas x:Name="ctverec_button_icon" />
+              <TextBlock Text="čtverec" />
+            </StackPanel>
+          </Button>
+          <Button x:Name="obdelnik_button" Click="shape_button_Click" HorizontalAlignment="Stretch" Margin="0,20,0,0">
+            <StackPanel>
+              <Canvas x:Name="obdelnik_button_icon" />
+              <TextBlock Text="obdélník" />
+            </StackPanel>
+          </Button>
+          <Button x:Name="kruh_button" Click="shape_button_Click" HorizontalAlignment="Stretch" Margin="0,20,0,0">
+            <StackPanel>
+              <Canvas x:Name="kruh_button_icon" />
+              <TextBlock Text="kruh" />
+            </StackPanel>
+          </Button>
+          <Button x:Name="nsten_button" Click="shape_button_Click" HorizontalAlignment="Stretch" Margin="0,20,0,0">
+            <StackPanel>
+              <Canvas x:Name="nsten_button_icon" />
+              <TextBlock Text="n-stěn" />
+            </StackPanel>
+          </Button>
         </StackPanel>
       </Grid>
       <StackPanel Grid.Column="1">
