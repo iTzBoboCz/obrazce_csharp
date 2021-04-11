@@ -49,7 +49,7 @@ namespace obrazce
 
     public void CreateNumberBox(string name, string text, string placeholder, object tag)
     {
-      NumberBox nb = new NumberBox() { Minimum = 1, Tag = tag, Name=name, Header = text, PlaceholderText = placeholder, Margin = new Thickness { Top = 10, Bottom = 10 } };
+      NumberBox nb = new NumberBox() { Minimum = 1, Tag = tag, Name = name, Header = text, PlaceholderText = placeholder, Margin = new Thickness { Top = 10, Bottom = 10 } };
       nb.ValueChanged += NumberBox_ValueChanged;
       parameters.Children.Add(nb);
       NumberBoxes.Add(nb.Name, nb);

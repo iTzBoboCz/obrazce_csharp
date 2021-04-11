@@ -60,12 +60,19 @@ namespace obrazce
     {
       double vyska = VypocitejVysku();
       double cx = Math.Sqrt((Strana_b * Strana_b) - (vyska * vyska));
+      double teziste_x = (Strana_a + cx) / 3;
+      double teziste_y = vyska / 3;
 
       Point a = new Point(0, vyska);
       Point b = new Point(Strana_a, vyska);
       Point c = new Point(cx, 0);
 
       Polygon tvar = new Polygon { Stroke = Brushes.Gray, Fill = Vypln };
+
+      double left = Canvas.ActualWidth / 2;
+      Canvas.SetLeft(tvar, left - teziste_x);
+      double top = Canvas.ActualHeight / 2;
+      Canvas.SetTop(tvar, top - teziste_y);
 
       tvar.Points.Add(a);
       tvar.Points.Add(b);
@@ -77,11 +84,6 @@ namespace obrazce
     public override void VykresliTvar()
     {
       Polygon tvar = ZiskejTvar();
-
-      double left = Canvas.ActualWidth / 2;
-      Canvas.SetLeft(tvar, left);
-      double top = Canvas.ActualHeight / 2;
-      Canvas.SetTop(tvar, top);
 
       Canvas.Children.Clear();
       Canvas.Children.Add(tvar);
@@ -125,16 +127,16 @@ namespace obrazce
     {
       Rectangle tvar = new Rectangle { Width = Strana, Height = Strana, Stroke = Brushes.Gray, Fill = Vypln };
 
+      double left = Canvas.ActualWidth / 2;
+      Canvas.SetLeft(tvar, left - (Strana / 2));
+      double top = Canvas.ActualHeight / 2;
+      Canvas.SetTop(tvar, top - (Strana / 2));
+
       return tvar;
     }
 
     public override void VykresliTvar()
     {
-      double left = (Canvas.ActualWidth - Canvas.ActualWidth) / 2;
-      Canvas.SetLeft(Canvas, left);
-      double top = (Canvas.ActualHeight - Canvas.ActualHeight) / 2;
-      Canvas.SetTop(Canvas, top);
-
       Canvas.Children.Clear();
       Canvas.Children.Add(ZiskejTvar());
     }
@@ -172,16 +174,16 @@ namespace obrazce
     {
       Rectangle tvar = new Rectangle { Width = Strana_a, Height = Strana_b, Stroke = Brushes.Gray, Fill = Vypln };
 
+      double left = Canvas.ActualWidth / 2;
+      Canvas.SetLeft(tvar, left - (Strana_a / 2));
+      double top = Canvas.ActualHeight / 2;
+      Canvas.SetTop(tvar, top - (Strana_b / 2));
+
       return tvar;
     }
 
     public override void VykresliTvar()
     {
-      double left = (Canvas.ActualWidth - Canvas.ActualWidth) / 2;
-      Canvas.SetLeft(Canvas, left);
-      double top = (Canvas.ActualHeight - Canvas.ActualHeight) / 2;
-      Canvas.SetTop(Canvas, top);
-
       Canvas.Children.Clear();
       Canvas.Children.Add(ZiskejTvar());
     }
@@ -207,8 +209,7 @@ namespace obrazce
 
     public static void VykresliIkonu(Canvas canvas, StackPanel sp)
     {
-      Kruh kruh = new Kruh(canvas, 15, Brushes.Black);
-      kruh.VykresliTvar();
+      Kruh kruh = new Kruh(canvas, 7.5, Brushes.Black);
 
       sp.Children.Add(kruh.ZiskejTvar());
       sp.Children.Add(new TextBlock { Margin = new Thickness { Left = 5 }, Text = "kruh" });
@@ -216,18 +217,18 @@ namespace obrazce
 
     public Ellipse ZiskejTvar()
     {
-      Ellipse tvar = new Ellipse { Width = Polomer, Height = Polomer, Stroke = Brushes.Gray, Fill = Vypln };
+      Ellipse tvar = new Ellipse { Width = Polomer * 2, Height = Polomer * 2, Stroke = Brushes.Gray, Fill = Vypln };
+
+      double left = Canvas.ActualWidth / 2;
+      Canvas.SetLeft(tvar, left - Polomer);
+      double top = Canvas.ActualHeight / 2;
+      Canvas.SetTop(tvar, top - Polomer);
 
       return tvar;
     }
 
     public override void VykresliTvar()
     {
-      double left = (Canvas.ActualWidth - Canvas.ActualWidth) / 2;
-      Canvas.SetLeft(Canvas, left);
-      double top = (Canvas.ActualHeight - Canvas.ActualHeight) / 2;
-      Canvas.SetTop(Canvas, top);
-
       Canvas.Children.Clear();
       Canvas.Children.Add(ZiskejTvar());
     }
@@ -261,14 +262,56 @@ namespace obrazce
       sp.Children.Add(new TextBlock { Margin = new Thickness { Left = 10 }, Text = "nsten" });
     }
 
+    public double VypocitejSirku(Polygon tvar)
+    {
+      double min = tvar.Points[0].X;
+      double max = tvar.Points[0].X;
+
+      for (int i = 1; i < tvar.Points.Count; i++)
+      {
+        if (max < tvar.Points[i].X)
+        {
+          max = tvar.Points[i].X;
+        }
+        else if (min > tvar.Points[i].X)
+        {
+          min = tvar.Points[i].X;
+        }
+      }
+
+      return max - min;
+    }
+
+    public double VypocitejVysku(Polygon tvar)
+    {
+      double min = tvar.Points[0].Y;
+      double max = tvar.Points[0].Y;
+
+      for (int i = 1; i < tvar.Points.Count; i++)
+      {
+        if (max < tvar.Points[i].Y)
+        {
+          max = tvar.Points[i].Y;
+        }
+        else if (min > tvar.Points[i].Y)
+        {
+          min = tvar.Points[i].Y;
+        }
+      }
+
+      return max - min;
+    }
+
     public Polygon ZiskejTvar()
     {
       Polygon tvar = new Polygon { Stroke = Brushes.Gray, Fill = Vypln };
 
-      double x = Vnejsi_polomer / 3;
-      double y = Vnejsi_polomer / 3;
+      if (Pocet_stran < 1) { return tvar; }
 
-      double angle = 2 * Math.PI / Pocet_stran;
+      double x = 0;
+      double y = 0;
+
+      double angle = (2 * Math.PI) / Pocet_stran;
       double delka_strany = Math.Sin(angle / 2) * Vnejsi_polomer;
 
       for (int strana = 0; strana < Pocet_stran; strana++)
@@ -278,6 +321,13 @@ namespace obrazce
 
         tvar.Points.Add(new Point(x, y));
       }
+
+      double vyska = VypocitejVysku(tvar);
+
+      double left = Canvas.ActualWidth / 2;
+      Canvas.SetLeft(tvar, left - (tvar.Points[0].X / 2));
+      double top = Canvas.ActualHeight / 2;
+      Canvas.SetTop(tvar, top - (vyska / 2));
 
       return tvar;
     }
