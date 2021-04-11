@@ -10,8 +10,8 @@ namespace obrazce
 {
   class Tvar
   {
-    protected int Obvod;
-    protected int Obsah;
+    protected double Obvod;
+    protected double Obsah;
     protected SolidColorBrush Vypln;
     protected Canvas Canvas;
 
@@ -21,53 +21,49 @@ namespace obrazce
       this.Vypln = vypln;
     }
 
-    public static Canvas VykresliIkonu() { return new Canvas { }; }
+    public virtual void VykresliTvar() { }
 
-    public void VykresliTvar() { }
+    public virtual void VypocitejObvod() { }
 
-    public int VypocitejObvod()
+    public virtual void VypocitejObsah() { }
+
+    public void AktualizujVypocet(Tvar tvar, Canvas canvas, TextBlock tb)
     {
-      return this.Obvod;
-    }
-
-    public int VypocitejObsah()
-    {
-      return this.Obsah;
+      tb.Text = $"obvod: {Obvod} | obsah: {Obsah}";
     }
   }
 
   class Trojuhelnik : Tvar
   {
-    private int Strana_a;
-    private int Strana_b;
-    private int Strana_c;
-    public Trojuhelnik(Canvas canvas, int strana_a, int strana_b, int strana_c, SolidColorBrush vypln) : base(canvas, vypln)
+    private double Strana_a;
+    private double Strana_b;
+    private double Strana_c;
+    public Trojuhelnik(Canvas canvas, double strana_a, double strana_b, double strana_c, SolidColorBrush vypln) : base(canvas, vypln)
     {
       this.Strana_a = strana_a;
       this.Strana_b = strana_b;
       this.Strana_c = strana_c;
       this.Canvas = canvas;
+
+      //AktualizujVypocet(new Trojuhelnik(canvas, Strana_a, Strana_b, Strana_c, vypln), Canvas, );
     }
 
-    public static void VykresliIkonu(Canvas canvas)
+    public static void VykresliIkonu(Canvas canvas, StackPanel sp)
     {
       Trojuhelnik trojuhelnik = new Trojuhelnik(canvas, 15, 15, 15, Brushes.Black);
-      trojuhelnik.VykresliTvar();
+
+      sp.Children.Add(trojuhelnik.ZiskejTvar());
+      sp.Children.Add(new TextBlock { Margin = new Thickness { Left = 5 }, Text = "trojůhelník" });
     }
 
-    public void VykresliTvar()
+    public Polygon ZiskejTvar()
     {
-      double left = (Canvas.ActualWidth - Canvas.ActualWidth) / 2;
-      Canvas.SetLeft(Canvas, left);
-      double top = (Canvas.ActualHeight - Canvas.ActualHeight) / 2;
-      Canvas.SetTop(Canvas, top);
-
       double vyska = VypocitejVysku();
       double cx = Math.Sqrt((Strana_b * Strana_b) - (vyska * vyska));
 
-      Point a = new Point(0, 0);
-      Point b = new Point(Strana_a, 0);
-      Point c = new Point(cx, -vyska);
+      Point a = new Point(0, vyska);
+      Point b = new Point(Strana_a, vyska);
+      Point c = new Point(cx, 0);
 
       Polygon tvar = new Polygon { Stroke = Brushes.Gray, Fill = Vypln };
 
@@ -75,8 +71,20 @@ namespace obrazce
       tvar.Points.Add(b);
       tvar.Points.Add(c);
 
+      return tvar;
+    }
+
+    public override void VykresliTvar()
+    {
+      Polygon tvar = ZiskejTvar();
+
+      double left = Canvas.ActualWidth / 2;
+      Canvas.SetLeft(tvar, left);
+      double top = Canvas.ActualHeight / 2;
+      Canvas.SetTop(tvar, top);
+
+      Canvas.Children.Clear();
       Canvas.Children.Add(tvar);
-      System.Diagnostics.Trace.WriteLine("volání");
     }
 
     public double VypocitejVysku()
@@ -85,169 +93,209 @@ namespace obrazce
       return vyska;
     }
 
-    public int VypocitejObvod()
+    public override void VypocitejObvod()
     {
-      return Strana_a + Strana_b + Strana_c;
+      this.Obvod = Strana_a + Strana_b + Strana_c;
     }
 
-    public int VypocitejObsah()
+    public override void VypocitejObsah()
     {
       // https://cs.wikipedia.org/wiki/Heron%C5%AFv_vzorec
-      float s = VypocitejObvod() / 2;
-      return (int)Math.Round(Math.Sqrt(s * (s - Strana_a) * (s - Strana_b) * (s - Strana_c)));
+      double s = Obvod / 2;
+      this.Obsah = Math.Round(Math.Sqrt(s * (s - Strana_a) * (s - Strana_b) * (s - Strana_c)));
     }
   }
 
   class Ctverec : Tvar
   {
-    private int Strana;
-    public Ctverec(Canvas canvas, int strana, SolidColorBrush vypln) : base(canvas, vypln)
+    private double Strana;
+    public Ctverec(Canvas canvas, double strana, SolidColorBrush vypln) : base(canvas, vypln)
     {
       this.Strana = strana;
     }
-    public static void VykresliIkonu(Canvas canvas)
+    public static void VykresliIkonu(Canvas canvas, StackPanel sp)
     {
       Ctverec ctverec = new Ctverec(canvas, 10, Brushes.Black);
-      ctverec.VykresliTvar();
+
+      sp.Children.Add(ctverec.ZiskejTvar());
+      sp.Children.Add(new TextBlock { Margin = new Thickness { Left = 5 }, Text = "čtverec" });
     }
 
-    public void VykresliTvar()
+    public Rectangle ZiskejTvar()
+    {
+      Rectangle tvar = new Rectangle { Width = Strana, Height = Strana, Stroke = Brushes.Gray, Fill = Vypln };
+
+      return tvar;
+    }
+
+    public override void VykresliTvar()
     {
       double left = (Canvas.ActualWidth - Canvas.ActualWidth) / 2;
       Canvas.SetLeft(Canvas, left);
       double top = (Canvas.ActualHeight - Canvas.ActualHeight) / 2;
       Canvas.SetTop(Canvas, top);
 
-      Rectangle tvar = new Rectangle { Width = Strana, Height = Strana, Stroke = Brushes.Gray, Fill = Vypln };
-
-      Canvas.Children.Add(tvar);
+      Canvas.Children.Clear();
+      Canvas.Children.Add(ZiskejTvar());
     }
 
-    public int VypocitejObvod()
+    public override void VypocitejObvod()
     {
-      return 4 * Strana;
+      this.Obvod = 4 * Strana;
     }
 
-    public int VypocitejObsah()
+    public override void VypocitejObsah()
     {
-      return Strana * Strana;
+      this.Obsah = Strana * Strana;
     }
   }
 
   class Obdelnik : Tvar
   {
-    private int Strana_a;
-    private int Strana_b;
-    public Obdelnik(Canvas canvas, int strana_a, int strana_b, SolidColorBrush vypln) : base(canvas, vypln)
+    private double Strana_a;
+    private double Strana_b;
+    public Obdelnik(Canvas canvas, double strana_a, double strana_b, SolidColorBrush vypln) : base(canvas, vypln)
     {
       this.Strana_a = strana_a;
       this.Strana_b = strana_b;
     }
 
-    public static void VykresliIkonu(Canvas canvas)
+    public static void VykresliIkonu(Canvas canvas, StackPanel sp)
     {
       Obdelnik obdelnik = new Obdelnik(canvas, 10, 20, Brushes.Black);
-      obdelnik.VykresliTvar();
+
+      sp.Children.Add(obdelnik.ZiskejTvar());
+      sp.Children.Add(new TextBlock { Margin = new Thickness { Left = 5 }, Text = "obdélník" });
     }
 
-    public void VykresliTvar()
+    public Rectangle ZiskejTvar()
+    {
+      Rectangle tvar = new Rectangle { Width = Strana_a, Height = Strana_b, Stroke = Brushes.Gray, Fill = Vypln };
+
+      return tvar;
+    }
+
+    public override void VykresliTvar()
     {
       double left = (Canvas.ActualWidth - Canvas.ActualWidth) / 2;
       Canvas.SetLeft(Canvas, left);
       double top = (Canvas.ActualHeight - Canvas.ActualHeight) / 2;
       Canvas.SetTop(Canvas, top);
 
-      Rectangle tvar = new Rectangle { Width = Strana_a, Height = Strana_b, Stroke = Brushes.Gray, Fill = Vypln };
-
-      Canvas.Children.Add(tvar);
+      Canvas.Children.Clear();
+      Canvas.Children.Add(ZiskejTvar());
     }
 
-    public int VypocitejObvod()
+    public override void VypocitejObvod()
     {
-      return 2 * (Strana_a + Strana_b);
+      this.Obvod = 2 * (Strana_a + Strana_b);
     }
 
-    public int VypocitejObsah()
+    public override void VypocitejObsah()
     {
-      return Strana_a * Strana_b;
+      this.Obsah = Strana_a * Strana_b;
     }
   }
 
   class Kruh : Tvar
   {
-    private int Polomer;
-    public Kruh(Canvas canvas, int polomer, SolidColorBrush vypln) : base(canvas, vypln)
+    private double Polomer;
+    public Kruh(Canvas canvas, double polomer, SolidColorBrush vypln) : base(canvas, vypln)
     {
       this.Polomer = polomer;
     }
 
-    public static void VykresliIkonu(Canvas canvas)
+    public static void VykresliIkonu(Canvas canvas, StackPanel sp)
     {
       Kruh kruh = new Kruh(canvas, 15, Brushes.Black);
       kruh.VykresliTvar();
+
+      sp.Children.Add(kruh.ZiskejTvar());
+      sp.Children.Add(new TextBlock { Margin = new Thickness { Left = 5 }, Text = "kruh" });
     }
 
-    public void VykresliTvar()
+    public Ellipse ZiskejTvar()
+    {
+      Ellipse tvar = new Ellipse { Width = Polomer, Height = Polomer, Stroke = Brushes.Gray, Fill = Vypln };
+
+      return tvar;
+    }
+
+    public override void VykresliTvar()
     {
       double left = (Canvas.ActualWidth - Canvas.ActualWidth) / 2;
       Canvas.SetLeft(Canvas, left);
       double top = (Canvas.ActualHeight - Canvas.ActualHeight) / 2;
       Canvas.SetTop(Canvas, top);
 
-      Ellipse tvar = new Ellipse { Width = Polomer, Height = Polomer, Stroke = Brushes.Gray, Fill = Vypln };
-
-      Canvas.Children.Add(tvar);
+      Canvas.Children.Clear();
+      Canvas.Children.Add(ZiskejTvar());
     }
 
-    public double VypocitejObvod()
+    public override void VypocitejObvod()
     {
-      return 2 * Math.PI * Polomer;
+      this.Obvod = 2 * Math.PI * Polomer;
     }
 
-    public double VypocitejObsah()
+    public override void VypocitejObsah()
     {
-      return Math.PI * Polomer * Polomer;
+      this.Obsah = Math.PI * Polomer * Polomer;
     }
   }
 
   class Nsten : Tvar
   {
-    private int Vnejsi_polomer;
+    private double Vnejsi_polomer;
     private int Pocet_stran;
-    public Nsten(Canvas canvas, int pocet_stran, int vnejsi_polomer, SolidColorBrush vypln) : base(canvas, vypln)
+    public Nsten(Canvas canvas, int pocet_stran, double vnejsi_polomer, SolidColorBrush vypln) : base(canvas, vypln)
     {
       this.Vnejsi_polomer = vnejsi_polomer;
       this.Pocet_stran = pocet_stran;
     }
 
-    public static void VykresliIkonu(Canvas canvas)
+    public static void VykresliIkonu(Canvas canvas, StackPanel sp)
     {
-      Nsten nsten = new Nsten(canvas, 10, 5, Brushes.Black);
-      nsten.VykresliTvar();
+      Nsten nsten = new Nsten(canvas, 6, 15, Brushes.Black);
+
+      sp.Children.Add(nsten.ZiskejTvar());
+      sp.Children.Add(new TextBlock { Margin = new Thickness { Left = 10 }, Text = "nsten" });
     }
 
-    public void VykresliTvar()
+    public Polygon ZiskejTvar()
     {
-      double left = (Canvas.ActualWidth - Canvas.ActualWidth) / 2;
-      Canvas.SetLeft(Canvas, left);
-      double top = (Canvas.ActualHeight - Canvas.ActualHeight) / 2;
-      Canvas.SetTop(Canvas, top);
-
       Polygon tvar = new Polygon { Stroke = Brushes.Gray, Fill = Vypln };
 
-      int x = 0;
-      int y = 0;
+      double x = Vnejsi_polomer / 3;
+      double y = Vnejsi_polomer / 3;
 
-      tvar.Points.Add(new Point(x + Vnejsi_polomer * Math.Cos(0), y + Vnejsi_polomer + Math.Sin(0)));
+      double angle = 2 * Math.PI / Pocet_stran;
+      double delka_strany = Math.Sin(angle / 2) * Vnejsi_polomer;
 
       for (int strana = 0; strana < Pocet_stran; strana++)
       {
-        tvar.Points.Add(new Point(x + Vnejsi_polomer * Math.Cos(strana * 2 * Math.PI / 6), y + Vnejsi_polomer + Math.Sin(strana * Math.PI / 6)));
-        x += 360 / Pocet_stran;
-        y += 360 / Pocet_stran;
+        x += delka_strany * Math.Cos(angle * strana);
+        y += delka_strany * Math.Sin(angle * strana);
+
+        tvar.Points.Add(new Point(x, y));
       }
 
-      Canvas.Children.Add(tvar);
+      return tvar;
+    }
+
+    public override void VykresliTvar()
+    {
+      Canvas.Children.Clear();
+      Canvas.Children.Add(ZiskejTvar());
+    }
+
+    public override void VypocitejObvod()
+    {
+      this.Obvod = 2 * Math.PI * Vnejsi_polomer;
+    }
+
+    public override void VypocitejObsah()
+    {
+      this.Obsah = Math.PI * Vnejsi_polomer * Vnejsi_polomer;
     }
   }
 }

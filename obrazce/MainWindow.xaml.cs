@@ -21,15 +21,19 @@ namespace obrazce
   /// </summary>
   public partial class MainWindow : Window
   {
+    /// <summary>
+    ///  Active numberboxes and their current value
+    /// </summary>
+    public Dictionary<string, NumberBox> NumberBoxes = new Dictionary<string, NumberBox>();
     public MainWindow()
     {
       InitializeComponent();
 
-      Trojuhelnik.VykresliIkonu(trojuhelnik_button_icon);
-      Ctverec.VykresliIkonu(ctverec_button_icon);
-      Obdelnik.VykresliIkonu(obdelnik_button_icon);
-      Kruh.VykresliIkonu(kruh_button_icon);
-      Nsten.VykresliIkonu(nsten_button_icon);
+      Trojuhelnik.VykresliIkonu(shape_canvas, trojuhelnik_stackpanel);
+      Ctverec.VykresliIkonu(shape_canvas, ctverec_stackpanel);
+      Obdelnik.VykresliIkonu(shape_canvas, obdelnik_stackpanel);
+      Kruh.VykresliIkonu(shape_canvas, kruh_stackpanel);
+      Nsten.VykresliIkonu(shape_canvas, nsten_stackpanel);
     }
 
     public void Clear()
@@ -38,27 +42,52 @@ namespace obrazce
       shape_canvas.Children.Clear();
 
       parameters.Children.Add(new TextBlock { Text = "Parametry", FontSize = 20, FontWeight = FontWeight.FromOpenTypeWeight(700), HorizontalAlignment = HorizontalAlignment.Center });
+
+      NumberBoxes.Clear();
+      calculated_textblock.Text = "";
     }
 
-    public void CreateNumberBox(string text, string placeholder)
+    public void CreateNumberBox(string name, string text, string placeholder, object tag)
     {
-      NumberBox nb = new NumberBox() { Header = text, PlaceholderText = placeholder, Margin = new Thickness { Top = 10, Bottom = 10 } };
+      NumberBox nb = new NumberBox() { Minimum = 1, Tag = tag, Name=name, Header = text, PlaceholderText = placeholder, Margin = new Thickness { Top = 10, Bottom = 10 } };
       nb.ValueChanged += NumberBox_ValueChanged;
       parameters.Children.Add(nb);
-      // parameters.Children.Add(new StackPanel { Name = $"stackpanel_params_{name}", Margin = new Thickness { Top=20 } });
-      // string = ($"stackpanel_params_{name}")
-      // <StackPanel Margin="0,20,0,0">
-      //   <Label> strana:</Label>
-      //   <TextBox Margin = "0,5,0,0" />
-      // </StackPanel>
+      NumberBoxes.Add(nb.Name, nb);
     }
 
     private void NumberBox_ValueChanged(NumberBox sender, NumberBoxValueChangedEventArgs args)
     {
-      // přepočítej, vykresli
+      string origin = (string)sender.Tag;
+
+      switch (origin)
+      {
+        case "trojuhelnik_button":
+          shape_canvas.Children.Clear();
+          Trojuhelnik trojuhelnik = new Trojuhelnik(shape_canvas, NumberBoxes["trojuhelnik_strana_a"].Value, NumberBoxes["trojuhelnik_strana_b"].Value, NumberBoxes["trojuhelnik_strana_c"].Value, Brushes.Gray);
+          trojuhelnik.VykresliTvar();
+          break;
+        case "ctverec_button":
+          Ctverec ctverec = new Ctverec(shape_canvas, NumberBoxes["ctverec_strana"].Value, Brushes.Gray);
+          ctverec.VykresliTvar();
+          break;
+        case "obdelnik_button":
+          Obdelnik obdelnik = new Obdelnik(shape_canvas, NumberBoxes["obdelnik_strana_a"].Value, NumberBoxes["obdelnik_strana_b"].Value, Brushes.Gray);
+          obdelnik.VykresliTvar();
+          break;
+        case "kruh_button":
+          Kruh kruh = new Kruh(shape_canvas, NumberBoxes["kruh_polomer"].Value, Brushes.Gray);
+          kruh.VykresliTvar();
+          break;
+        case "nsten_button":
+          Nsten nsten = new Nsten(shape_canvas, (int)NumberBoxes["nsten_pocet_stran"].Value, NumberBoxes["nsten_vnejsi_polomer"].Value, Brushes.Gray);
+          nsten.VykresliTvar();
+          break;
+        default:
+          break;
+      }
     }
 
-    private void shape_button_Click(object sender, RoutedEventArgs e)
+    public void shape_button_Click(object sender, RoutedEventArgs e)
     {
       string origin = ((Button)sender).Name;
 
@@ -66,30 +95,30 @@ namespace obrazce
       {
         case "trojuhelnik_button":
           Clear();
-          CreateNumberBox("strana a", "10");
-          CreateNumberBox("strana b", "20");
-          CreateNumberBox("strana c", "30");
+          CreateNumberBox("trojuhelnik_strana_a", "strana a", "10", origin);
+          CreateNumberBox("trojuhelnik_strana_b", "strana b", "20", origin);
+          CreateNumberBox("trojuhelnik_strana_c", "strana c", "30", origin);
           //Trojuhelnik trojuhelnik = new Trojuhelnik(shape_canvas, 100, 100, 100, true);
           //trojuhelnik.VykresliTvar();
           break;
         case "ctverec_button":
-          System.Diagnostics.Trace.WriteLine("test");
           Clear();
-          CreateNumberBox("strana", "10");
+          CreateNumberBox("ctverec_strana", "strana", "10", origin);
           break;
         case "obdelnik_button":
           Clear();
-          CreateNumberBox("strana a", "10");
-          CreateNumberBox("strana b", "20");
+          CreateNumberBox("obdelnik_strana_a", "strana a", "10", origin);
+          CreateNumberBox("obdelnik_strana_b", "strana b", "20", origin);
+          //Obdelnik.AktualizujVypocet(new Obdelnik(shape_canvas, 0, 0, Brushes.Gray), shape_canvas, calculated_textblock);
           break;
         case "kruh_button":
           Clear();
-          CreateNumberBox("poloměr", "20");
+          CreateNumberBox("kruh_polomer", "poloměr", "20", origin);
           break;
-        case "ngon_button":
+        case "nsten_button":
           Clear();
-          CreateNumberBox("poloměr", "10");
-          CreateNumberBox("počet stran", "8");
+          CreateNumberBox("nsten_vnejsi_polomer", "vnější poloměr", "10", origin);
+          CreateNumberBox("nsten_pocet_stran", "počet stran", "8", origin);
           break;
         default:
           Clear();
@@ -97,12 +126,12 @@ namespace obrazce
       }
     }
 
-    private void menu_clear_Click(object sender, RoutedEventArgs e)
+    public void menu_clear_Click(object sender, RoutedEventArgs e)
     {
       Clear();
     }
 
-    private void menu_about_application_Click(object sender, RoutedEventArgs e)
+    public void menu_about_application_Click(object sender, RoutedEventArgs e)
     {
       var dialog = new AboutWindow();
       dialog.ShowDialog();
