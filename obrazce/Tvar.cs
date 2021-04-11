@@ -8,46 +8,99 @@ using System.Windows;
 
 namespace obrazce
 {
+  /// <summary>
+  /// Default shape.
+  /// </summary>
   class Tvar
   {
+    /// <summary>
+    /// Perimeter.
+    /// </summary>
     protected double Obvod;
+    /// <summary>
+    /// Area.
+    /// </summary>
     protected double Obsah;
+    /// <summary>
+    /// Color of the shape.
+    /// </summary>
     protected SolidColorBrush Vypln;
+    /// <summary>
+    /// Canvas.
+    /// </summary>
     protected Canvas Canvas;
 
+    /// <summary>
+    /// Sets values.
+    /// </summary>
+    /// <param name="canvas">Canvas.</param>
+    /// <param name="vypln">Fill.</param>
     public Tvar(Canvas canvas, SolidColorBrush vypln)
     {
       this.Canvas = canvas;
       this.Vypln = vypln;
     }
 
-    public virtual void VykresliTvar() { }
+    /// <summary>
+    /// Draws shape.
+    /// </summary>
+    /// <param name="tb">TextBlock where the perimeter and area is shown.</param>
+    public virtual void VykresliTvar(TextBlock tb) { }
 
+    /// <summary>
+    /// Calculates perimeter.
+    /// </summary>
     public virtual void VypocitejObvod() { }
 
+    /// <summary>
+    /// Calculates area.
+    /// </summary>
     public virtual void VypocitejObsah() { }
 
+    /// <summary>
+    /// Updates calculations and info under drawn shape.
+    /// </summary>
+    /// <param name="tvar">Shape.</param>
+    /// <param name="canvas">Canvas.</param>
+    /// <param name="tb">TextBox.</param>
     public void AktualizujVypocet(Tvar tvar, Canvas canvas, TextBlock tb)
     {
-      tb.Text = $"obvod: {Obvod} | obsah: {Obsah}";
+      VypocitejObvod();
+      VypocitejObsah();
+
+      tb.Text = $"obvod: {Obvod.ToString("F3")} | obsah: {Obsah.ToString("F3")}";
     }
   }
 
+  /// <summary>
+  /// Triangle.
+  /// </summary>
   class Trojuhelnik : Tvar
   {
     private double Strana_a;
     private double Strana_b;
     private double Strana_c;
+    /// <summary>
+    /// Sets values.
+    /// </summary>
+    /// <param name="canvas">Canvas.</param>
+    /// <param name="strana_a">Length of a.</param>
+    /// <param name="strana_b">Length of b.</param>
+    /// <param name="strana_c">Length of c.</param>
+    /// <param name="vypln">Fill.</param>
     public Trojuhelnik(Canvas canvas, double strana_a, double strana_b, double strana_c, SolidColorBrush vypln) : base(canvas, vypln)
     {
       this.Strana_a = strana_a;
       this.Strana_b = strana_b;
       this.Strana_c = strana_c;
       this.Canvas = canvas;
-
-      //AktualizujVypocet(new Trojuhelnik(canvas, Strana_a, Strana_b, Strana_c, vypln), Canvas, );
     }
 
+    /// <summary>
+    /// Draws icon.
+    /// </summary>
+    /// <param name="canvas">Canvas.</param>
+    /// <param name="sp">StackPanel.</param>
     public static void VykresliIkonu(Canvas canvas, StackPanel sp)
     {
       Trojuhelnik trojuhelnik = new Trojuhelnik(canvas, 15, 15, 15, Brushes.Black);
@@ -56,6 +109,10 @@ namespace obrazce
       sp.Children.Add(new TextBlock { Margin = new Thickness { Left = 5 }, Text = "trojůhelník" });
     }
 
+    /// <summary>
+    /// Gets the shape.
+    /// </summary>
+    /// <returns>Shape.</returns>
     public Polygon ZiskejTvar()
     {
       double vyska = VypocitejVysku();
@@ -81,14 +138,19 @@ namespace obrazce
       return tvar;
     }
 
-    public override void VykresliTvar()
+    public override void VykresliTvar(TextBlock tb)
     {
       Polygon tvar = ZiskejTvar();
 
       Canvas.Children.Clear();
       Canvas.Children.Add(tvar);
+      AktualizujVypocet(new Trojuhelnik(Canvas, Strana_a, Strana_b, Strana_c, Vypln), Canvas, tb);
     }
 
+    /// <summary>
+    /// Calculates height.
+    /// </summary>
+    /// <returns>Height.</returns>
     public double VypocitejVysku()
     {
       double vyska = Math.Sqrt(4 * (Strana_c * Strana_c) * (Strana_a * Strana_a) - Math.Pow((Strana_a * Strana_a) + (Strana_c * Strana_c) - (Strana_b * Strana_b), 2)) / (Strana_a * 2);
@@ -108,6 +170,9 @@ namespace obrazce
     }
   }
 
+  /// <summary>
+  /// Rectangle.
+  /// </summary>
   class Ctverec : Tvar
   {
     private double Strana;
@@ -115,6 +180,12 @@ namespace obrazce
     {
       this.Strana = strana;
     }
+
+    /// <summary>
+    /// Draws icon.
+    /// </summary>
+    /// <param name="canvas">Canvas.</param>
+    /// <param name="sp">StackPanel.</param>
     public static void VykresliIkonu(Canvas canvas, StackPanel sp)
     {
       Ctverec ctverec = new Ctverec(canvas, 10, Brushes.Black);
@@ -123,6 +194,10 @@ namespace obrazce
       sp.Children.Add(new TextBlock { Margin = new Thickness { Left = 5 }, Text = "čtverec" });
     }
 
+    /// <summary>
+    /// Gets the shape.
+    /// </summary>
+    /// <returns>Shape.</returns>
     public Rectangle ZiskejTvar()
     {
       Rectangle tvar = new Rectangle { Width = Strana, Height = Strana, Stroke = Brushes.Gray, Fill = Vypln };
@@ -135,10 +210,11 @@ namespace obrazce
       return tvar;
     }
 
-    public override void VykresliTvar()
+    public override void VykresliTvar(TextBlock tb)
     {
       Canvas.Children.Clear();
       Canvas.Children.Add(ZiskejTvar());
+      AktualizujVypocet(new Ctverec(Canvas, Strana, Vypln), Canvas, tb);
     }
 
     public override void VypocitejObvod()
@@ -162,6 +238,11 @@ namespace obrazce
       this.Strana_b = strana_b;
     }
 
+    /// <summary>
+    /// Draws icon.
+    /// </summary>
+    /// <param name="canvas">Canvas.</param>
+    /// <param name="sp">StackPanel.</param>
     public static void VykresliIkonu(Canvas canvas, StackPanel sp)
     {
       Obdelnik obdelnik = new Obdelnik(canvas, 10, 20, Brushes.Black);
@@ -170,6 +251,10 @@ namespace obrazce
       sp.Children.Add(new TextBlock { Margin = new Thickness { Left = 5 }, Text = "obdélník" });
     }
 
+    /// <summary>
+    /// Gets the shape.
+    /// </summary>
+    /// <returns>Shape.</returns>
     public Rectangle ZiskejTvar()
     {
       Rectangle tvar = new Rectangle { Width = Strana_a, Height = Strana_b, Stroke = Brushes.Gray, Fill = Vypln };
@@ -182,10 +267,11 @@ namespace obrazce
       return tvar;
     }
 
-    public override void VykresliTvar()
+    public override void VykresliTvar(TextBlock tb)
     {
       Canvas.Children.Clear();
       Canvas.Children.Add(ZiskejTvar());
+      AktualizujVypocet(new Obdelnik(Canvas, Strana_a, Strana_b, Vypln), Canvas, tb);
     }
 
     public override void VypocitejObvod()
@@ -199,6 +285,9 @@ namespace obrazce
     }
   }
 
+  /// <summary>
+  /// Circle.
+  /// </summary>
   class Kruh : Tvar
   {
     private double Polomer;
@@ -207,6 +296,11 @@ namespace obrazce
       this.Polomer = polomer;
     }
 
+    /// <summary>
+    /// Draws icon.
+    /// </summary>
+    /// <param name="canvas">Canvas.</param>
+    /// <param name="sp">StackPanel.</param>
     public static void VykresliIkonu(Canvas canvas, StackPanel sp)
     {
       Kruh kruh = new Kruh(canvas, 7.5, Brushes.Black);
@@ -215,6 +309,10 @@ namespace obrazce
       sp.Children.Add(new TextBlock { Margin = new Thickness { Left = 5 }, Text = "kruh" });
     }
 
+    /// <summary>
+    /// Gets the shape.
+    /// </summary>
+    /// <returns>Shape.</returns>
     public Ellipse ZiskejTvar()
     {
       Ellipse tvar = new Ellipse { Width = Polomer * 2, Height = Polomer * 2, Stroke = Brushes.Gray, Fill = Vypln };
@@ -227,10 +325,11 @@ namespace obrazce
       return tvar;
     }
 
-    public override void VykresliTvar()
+    public override void VykresliTvar(TextBlock tb)
     {
       Canvas.Children.Clear();
       Canvas.Children.Add(ZiskejTvar());
+      AktualizujVypocet(new Ctverec(Canvas, Polomer, Vypln), Canvas, tb);
     }
 
     public override void VypocitejObvod()
@@ -244,6 +343,9 @@ namespace obrazce
     }
   }
 
+  /// <summary>
+  /// N-gon.
+  /// </summary>
   class Nsten : Tvar
   {
     private double Vnejsi_polomer;
@@ -254,6 +356,11 @@ namespace obrazce
       this.Pocet_stran = pocet_stran;
     }
 
+    /// <summary>
+    /// Draws icon.
+    /// </summary>
+    /// <param name="canvas">Canvas.</param>
+    /// <param name="sp">StackPanel.</param>
     public static void VykresliIkonu(Canvas canvas, StackPanel sp)
     {
       Nsten nsten = new Nsten(canvas, 6, 15, Brushes.Black);
@@ -262,6 +369,11 @@ namespace obrazce
       sp.Children.Add(new TextBlock { Margin = new Thickness { Left = 10 }, Text = "nsten" });
     }
 
+    /// <summary>
+    /// Calculates width.
+    /// </summary>
+    /// <param name="tvar">Shape.</param>
+    /// <returns>Width.</returns>
     public double VypocitejSirku(Polygon tvar)
     {
       double min = tvar.Points[0].X;
@@ -282,6 +394,11 @@ namespace obrazce
       return max - min;
     }
 
+    /// <summary>
+    /// Calculates height.
+    /// </summary>
+    /// <param name="tvar">Shape.</param>
+    /// <returns>Height.</returns>
     public double VypocitejVysku(Polygon tvar)
     {
       double min = tvar.Points[0].Y;
@@ -302,6 +419,10 @@ namespace obrazce
       return max - min;
     }
 
+    /// <summary>
+    /// Gets the shape.
+    /// </summary>
+    /// <returns>Shape.</returns>
     public Polygon ZiskejTvar()
     {
       Polygon tvar = new Polygon { Stroke = Brushes.Gray, Fill = Vypln };
@@ -332,20 +453,26 @@ namespace obrazce
       return tvar;
     }
 
-    public override void VykresliTvar()
+    public override void VykresliTvar(TextBlock tb)
     {
       Canvas.Children.Clear();
       Canvas.Children.Add(ZiskejTvar());
+      AktualizujVypocet(new Nsten(Canvas, Pocet_stran, Vnejsi_polomer, Vypln), Canvas, tb);
     }
 
     public override void VypocitejObvod()
     {
-      this.Obvod = 2 * Math.PI * Vnejsi_polomer;
+      double polovicni_strana_mnohouhelniku = Vnejsi_polomer * Math.Sin(Math.PI / Pocet_stran);
+      this.Obvod = polovicni_strana_mnohouhelniku * 2 * Pocet_stran;
     }
 
     public override void VypocitejObsah()
     {
-      this.Obsah = Math.PI * Vnejsi_polomer * Vnejsi_polomer;
+      double vyska = Vnejsi_polomer * Math.Cos(Math.PI / Pocet_stran);
+      double polovicni_strana_mnohouhelniku = Vnejsi_polomer * Math.Sin(Math.PI / Pocet_stran);
+      double obsah_trojuhelniku = vyska * polovicni_strana_mnohouhelniku;
+
+      this.Obsah = obsah_trojuhelniku * Pocet_stran;
     }
   }
 }
