@@ -115,6 +115,13 @@ namespace obrazce
     /// <returns>Shape.</returns>
     public Polygon ZiskejTvar()
     {
+      Polygon tvar = new Polygon { Stroke = Brushes.Gray, Fill = Vypln };
+
+      if ((Strana_a + Strana_b) <= Strana_c || (Strana_b + Strana_c) <= Strana_a || (Strana_a + Strana_c) <= Strana_b)
+      {
+        return tvar;
+      }
+
       double vyska = VypocitejVysku();
       double cx = Math.Sqrt((Strana_b * Strana_b) - (vyska * vyska));
       double teziste_x = (Strana_a + cx) / 3;
@@ -123,8 +130,6 @@ namespace obrazce
       Point a = new Point(0, vyska);
       Point b = new Point(Strana_a, vyska);
       Point c = new Point(cx, 0);
-
-      Polygon tvar = new Polygon { Stroke = Brushes.Gray, Fill = Vypln };
 
       double left = Canvas.ActualWidth / 2;
       Canvas.SetLeft(tvar, left - teziste_x);
@@ -159,14 +164,30 @@ namespace obrazce
 
     public override void VypocitejObvod()
     {
-      this.Obvod = Strana_a + Strana_b + Strana_c;
+      if ((Strana_a + Strana_b) <= Strana_c ||
+        (Strana_b + Strana_c) <= Strana_a ||
+        (Strana_a + Strana_c) <= Strana_b)
+      { 
+        this.Obvod = double.NaN;
+      } else
+      {
+        this.Obvod = Strana_a + Strana_b + Strana_c;
+      }
     }
 
     public override void VypocitejObsah()
     {
-      // https://cs.wikipedia.org/wiki/Heron%C5%AFv_vzorec
-      double s = Obvod / 2;
-      this.Obsah = Math.Round(Math.Sqrt(s * (s - Strana_a) * (s - Strana_b) * (s - Strana_c)));
+      if ((Strana_a + Strana_b) <= Strana_c || (Strana_b + Strana_c) <= Strana_a || (Strana_a + Strana_c) <= Strana_b)
+      {
+        this.Obsah = double.NaN;
+      }
+      else
+      {
+        // https://cs.wikipedia.org/wiki/Heron%C5%AFv_vzorec
+        double s = Obvod / 2;
+        this.Obsah = Math.Round(Math.Sqrt(s * (s - Strana_a) * (s - Strana_b) * (s - Strana_c)));
+      }
+
     }
   }
 
@@ -257,7 +278,12 @@ namespace obrazce
     /// <returns>Shape.</returns>
     public Rectangle ZiskejTvar()
     {
-      Rectangle tvar = new Rectangle { Width = Strana_a, Height = Strana_b, Stroke = Brushes.Gray, Fill = Vypln };
+      if (Strana_a < 1 || Strana_b < 1)
+      {
+        return new Rectangle();
+      }
+
+    Rectangle tvar = new Rectangle { Width = Strana_a, Height = Strana_b, Stroke = Brushes.Gray, Fill = Vypln };
 
       double left = Canvas.ActualWidth / 2;
       Canvas.SetLeft(tvar, left - (Strana_a / 2));
@@ -276,12 +302,24 @@ namespace obrazce
 
     public override void VypocitejObvod()
     {
-      this.Obvod = 2 * (Strana_a + Strana_b);
+      if (Strana_a < 1 || Strana_b < 1)
+      {
+        this.Obvod = double.NaN;
+      } else
+      {
+        this.Obvod = 2 * (Strana_a + Strana_b);
+      }
     }
 
     public override void VypocitejObsah()
     {
-      this.Obsah = Strana_a * Strana_b;
+      if (Strana_a < 1 || Strana_b < 1)
+      {
+        this.Obsah = double.NaN;
+      } else
+      {
+        this.Obsah = Strana_a * Strana_b;
+      }
     }
   }
 

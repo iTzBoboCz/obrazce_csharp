@@ -57,9 +57,9 @@ namespace obrazce
     /// <param name="text">Text.</param>
     /// <param name="placeholder">Placeholder.</param>
     /// <param name="tag">Tag.</param>
-    public void CreateNumberBox(string name, string text, string placeholder, object tag)
+    public void CreateNumberBox(string name, string text, int defaultValue, object tag, int min = 1, int max = int.MaxValue)
     {
-      NumberBox nb = new NumberBox() { Minimum = 1, Tag = tag, Name = name, Header = text, PlaceholderText = placeholder, Margin = new Thickness { Top = 10, Bottom = 10 } };
+      NumberBox nb = new NumberBox() { Minimum = min, Maximum = max, Tag = tag, Name = name, Header = text, Value = defaultValue, Margin = new Thickness { Top = 10, Bottom = 10 } };
       nb.ValueChanged += NumberBox_ValueChanged;
       parameters.Children.Add(nb);
       NumberBoxes.Add(nb.Name, nb);
@@ -72,6 +72,8 @@ namespace obrazce
     /// <param name="args">Additional arguments.</param>
     private void NumberBox_ValueChanged(NumberBox sender, NumberBoxValueChangedEventArgs args)
     {
+      if (double.IsNaN(sender.Value)) { sender.Value = sender.Minimum; }
+
       string origin = (string)sender.Tag;
 
       switch (origin)
@@ -115,30 +117,37 @@ namespace obrazce
       {
         case "trojuhelnik_button":
           Clear();
-          CreateNumberBox("trojuhelnik_strana_a", "strana a", "10", origin);
-          CreateNumberBox("trojuhelnik_strana_b", "strana b", "20", origin);
-          CreateNumberBox("trojuhelnik_strana_c", "strana c", "30", origin);
-          //Trojuhelnik trojuhelnik = new Trojuhelnik(shape_canvas, 100, 100, 100, true);
-          //trojuhelnik.VykresliTvar();
+          CreateNumberBox("trojuhelnik_strana_a", "strana a", 30, origin);
+          CreateNumberBox("trojuhelnik_strana_b", "strana b", 40, origin);
+          CreateNumberBox("trojuhelnik_strana_c", "strana c", 50, origin);
+          Trojuhelnik trojuhelnik = new Trojuhelnik(shape_canvas, NumberBoxes["trojuhelnik_strana_a"].Value, NumberBoxes["trojuhelnik_strana_b"].Value, NumberBoxes["trojuhelnik_strana_c"].Value, Brushes.Gray);
+          trojuhelnik.VykresliTvar(calculated_textblock);
           break;
         case "ctverec_button":
           Clear();
-          CreateNumberBox("ctverec_strana", "strana", "10", origin);
+          CreateNumberBox("ctverec_strana", "strana", 10, origin);
+          Ctverec ctverec = new Ctverec(shape_canvas, NumberBoxes["ctverec_strana"].Value, Brushes.Gray);
+          ctverec.VykresliTvar(calculated_textblock);
           break;
         case "obdelnik_button":
           Clear();
-          CreateNumberBox("obdelnik_strana_a", "strana a", "10", origin);
-          CreateNumberBox("obdelnik_strana_b", "strana b", "20", origin);
-          //Obdelnik.AktualizujVypocet(new Obdelnik(shape_canvas, 0, 0, Brushes.Gray), shape_canvas, calculated_textblock);
+          CreateNumberBox("obdelnik_strana_a", "strana a", 10, origin);
+          CreateNumberBox("obdelnik_strana_b", "strana b", 20, origin);
+          Obdelnik obdelnik = new Obdelnik(shape_canvas, NumberBoxes["obdelnik_strana_a"].Value, NumberBoxes["obdelnik_strana_b"].Value, Brushes.Gray);
+          obdelnik.VykresliTvar(calculated_textblock);
           break;
         case "kruh_button":
           Clear();
-          CreateNumberBox("kruh_polomer", "poloměr", "20", origin);
+          CreateNumberBox("kruh_polomer", "poloměr", 20, origin);
+          Kruh kruh = new Kruh(shape_canvas, NumberBoxes["kruh_polomer"].Value, Brushes.Gray);
+          kruh.VykresliTvar(calculated_textblock);
           break;
         case "nsten_button":
           Clear();
-          CreateNumberBox("nsten_vnejsi_polomer", "vnější poloměr", "10", origin);
-          CreateNumberBox("nsten_pocet_stran", "počet stran", "8", origin);
+          CreateNumberBox("nsten_vnejsi_polomer", "vnější poloměr", 10, origin);
+          CreateNumberBox("nsten_pocet_stran", "počet stran", 8, origin, 3);
+          Nsten nsten = new Nsten(shape_canvas, (int)NumberBoxes["nsten_pocet_stran"].Value, NumberBoxes["nsten_vnejsi_polomer"].Value, Brushes.Gray);
+          nsten.VykresliTvar(calculated_textblock);
           break;
         default:
           Clear();
